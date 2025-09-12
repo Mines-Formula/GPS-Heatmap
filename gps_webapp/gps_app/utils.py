@@ -5,6 +5,48 @@ from .models import GPSTrack, GPSPoint
 from django.db import transaction
 import os
 
+def filter_gps_outliers(pivot_df, std_multiplier=20):
+    """
+    Filter out GPS outliers using standard deviation
+    Remove points that are more than std_multiplier * standard deviation away from mean
+    """
+    print(f"Filtering GPS outliers (threshold: {std_multiplier}x standard deviation)")
+    
+    # Calculate standard deviation for latitude and longitude
+    lat_mean = pivot_df['Latitude'].mean()
+    lat_std = pivot_df['Latitude'].std()
+    lon_mean = pivot_df['Longitude'].mean()
+    lon_std = pivot_df['Longitude'].std()
+    
+    print(f"Latitude: mean={lat_mean:.6f}, std={lat_std:.6f}")
+    print(f"Longitude: mean={lon_mean:.6f}, std={lon_std:.6f}")
+    
+    # Define outlier thresholds
+    lat_min_threshold = lat_mean - (std_multiplier * lat_std)
+    lat_max_threshold = lat_mean + (std_multiplier * lat_std)
+    lon_min_threshold = lon_mean - (std_multiplier * lon_std)
+    lon_max_threshold = lon_mean + (std_multiplier * lon_std)
+    
+    print(f"Latitude valid range: [{lat_min_threshold:.6f}, {lat_max_threshold:.6f}]")
+    print(f"Longitude valid range: [{lon_min_threshold:.6f}, {lon_max_threshold:.6f}]")
+    
+    # Filter out outliers
+    initial_count = len(pivot_df)
+    
+    valid_mask = (
+        (pivot_df['Latitude'] >= lat_min_threshold) &
+        (pivot_df['Latitude'] <= lat_max_threshold) &
+        (pivot_df['Longitude'] >= lon_min_threshold) &
+        (pivot_df['Longitude'] <= lon_max_threshold)
+    )
+    
+    filtered_df = pivot_df[valid_mask].copy()
+    outliers_removed = initial_count - len(filtered_df)
+    
+    print(f"Removed {outliers_removed} outliers ({(outliers_removed/initial_count)*100:.2f}%)")
+    
+    return filtered_df
+
 def process_gps_csv(track_instance):
     """
     Process uploaded CSV file using EXACT same logic as generate.py
@@ -45,6 +87,13 @@ def process_gps_csv(track_instance):
         
         if len(pivot_df) < 2:
             return False, "Need at least 2 valid GPS coordinate pairs"
+        
+        # NEW: Filter out GPS outliers using standard deviation
+        pivot_df = filter_gps_outliers(pivot_df, std_multiplier=20)
+        print(f"After outlier removal: {len(pivot_df)} rows")
+        
+        if len(pivot_df) < 2:
+            return False, "Not enough GPS points after outlier removal"
         
         # Convert timestamp to seconds (EXACT same as generate.py)
         pivot_df['seconds'] = pivot_df['Timestamp'] / 1000
