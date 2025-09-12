@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS Track Visualizer</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .upload-section {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #4a4a4a;
+        }
+        
+        .upload-area {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        .upload-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .visualization-area {
+            min-height: 600px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+        }
+        
+        .loading {
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #333;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GPS Track Visualizer</h1>
+            <p>Upload your GPS CSV file to visualize your track with interactive speed mapping</p>
+        </div>
+        
+        <div class="upload-section">
+            <div class="upload-area">
+                <h3>Upload GPS Data</h3>
+                <p>Select a CSV file containing latitude, longitude, and optionally time data</p>
+                <input type="file" id="csvFile" class="file-input" accept=".csv" />
+                <button class="upload-button" onclick="document.getElementById('csvFile').click()">
+                    Choose CSV File
+                </button>
+                <div id="uploadStatus" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+        
+        <div class="visualization-area" id="visualizationArea">
+            <div>
+                <h3>Ready for GPS Data</h3>
+                <p>Upload a CSV file to see your interactive GPS track visualization</p>
+                <small>The visualization will work similarly to your matplotlib version but in the browser!</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Basic file upload handling - will be replaced with React
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const statusDiv = document.getElementById('uploadStatus');
+                const visualizationArea = document.getElementById('visualizationArea');
+                
+                statusDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Processing GPS data...</div>';
+                
+                // This is a placeholder - in the React app we\'ll make actual API calls
+                setTimeout(() => {
+                    statusDiv.innerHTML = '<div style="color: #4CAF50;">✓ Ready for React implementation!</div>';
+                    visualizationArea.innerHTML = '<div><h3>React App Will Be Here</h3><p>The interactive map component will be loaded here once React is set up</p></div>';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

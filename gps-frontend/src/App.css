@@ -1,0 +1,120 @@
+.App {
+  background-color: #1a1a1a;
+  color: white;
+  min-height: 100vh;
+}
+
+.App-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.App-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.App-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.App-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.upload-section {
+  margin-bottom: 30px;
+}
+
+.controls-section {
+  margin-bottom: 20px;
+}
+
+.visualization-section {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 20px;
+  height: 600px;
+}
+
+.map-container {
+  background: #2a2a2a;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.info-panel {
+  background: #2a2a2a;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-message {
+  text-align: center;
+  padding: 60px 20px;
+  background: #2a2a2a;
+  border-radius: 10px;
+  border: 2px dashed #4a4a4a;
+}
+
+.welcome-message h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.welcome-message p {
+  color: #888;
+  margin-bottom: 10px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #333;
+  border-radius: 50%;
+  border-top-color: #667eea;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .visualization-section {
+    grid-template-columns: 1fr;
+    grid-template-rows: 500px auto;
+    height: auto;
+  }
+  
+  .info-panel {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .App-main {
+    padding: 10px;
+  }
+  
+  .App-header h1 {
+    font-size: 2rem;
+  }
+  
+  .visualization-section {
+    grid-template-rows: 400px auto;
+  }
+}
