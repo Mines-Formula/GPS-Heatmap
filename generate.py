@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
 import os
 from geopy.distance import geodesic
+import folium
 
 in_minutes = True
 
@@ -127,3 +129,116 @@ plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('./graphs/speed_vs_time_scatter.png', dpi=300, bbox_inches='tight')
 plt.close()
+
+print("Creating GPS track visualization...")
+
+# Create speed-based color-coded GPS track
+def create_speed_colored_track(df):
+    # Remove points with zero speed for better visualization
+    df_moving = df[df['speed'] > 0.1].copy()
+    
+    if len(df_moving) == 0:
+        print("No moving points found!")
+        return
+    
+    # Normalize speeds for color mapping (0 = blue, 1 = red)
+    min_speed = df_moving['speed'].min()
+    max_speed = df_moving['speed'].max()
+    print(f"Speed range: {min_speed:.2f} - {max_speed:.2f} m/s")
+    
+    # Create color map from blue (slow) to red (fast)
+    norm = colors.Normalize(vmin=min_speed, vmax=max_speed)
+    colormap = plt.cm.coolwarm  # Blue to red colormap
+    
+    # Create folium map centered on the track
+    center_lat = df_moving['Latitude'].mean()
+    center_lon = df_moving['Longitude'].mean()
+    
+    # Create the map
+    m = folium.Map(
+        location=[center_lat, center_lon],
+        zoom_start=15,
+        tiles='OpenStreetMap'
+    )
+    
+    # Add points with speed-based colors
+    coords = []
+    for i, row in df_moving.iterrows():
+        lat, lon, speed = row['Latitude'], row['Longitude'], row['speed']
+        coords.append([lat, lon])
+        
+        # Get color based on speed
+        color_val = norm(speed)
+        rgb = colormap(color_val)
+        hex_color = '#{:02x}{:02x}{:02x}'.format(int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
+        
+        # Add circle marker for this point
+        folium.CircleMarker(
+            location=[lat, lon],
+            radius=3,
+            popup=f'Speed: {speed:.1f} m/s',
+            color=hex_color,
+            fill=True,
+            fillColor=hex_color,
+            fillOpacity=0.8
+        ).add_to(m)
+    
+    # Add the track line
+    folium.PolyLine(
+        coords,
+        color='black',
+        weight=2,
+        opacity=0.8
+    ).add_to(m)
+    
+    # Add a legend
+    legend_html = '''
+    <div style="position: fixed; 
+                bottom: 50px; left: 50px; width: 150px; height: 90px; 
+                background-color: white; border:2px solid grey; z-index:9999; 
+                font-size:14px; ">
+    <p style="margin: 10px;"><b>Speed Legend</b></p>
+    <p style="margin: 10px; color: blue;">Blue: Slow ({:.1f} m/s)</p>
+    <p style="margin: 10px; color: red;">Red: Fast ({:.1f} m/s)</p>
+    </div>
+    '''.format(min_speed, max_speed)
+    
+    m.get_root().html.add_child(folium.Element(legend_html))
+    
+    # Save the map
+    m.save('./graphs/gps_speed_track.html')
+    print("GPS track saved as './graphs/gps_speed_track.html'")
+    
+    # Also create a matplotlib version
+    plt.figure(figsize=(12, 10))
+    
+    # Plot the track with speed colors
+    for i in range(len(df_moving) - 1):
+        lat1, lon1 = df_moving.iloc[i]['Latitude'], df_moving.iloc[i]['Longitude']
+        lat2, lon2 = df_moving.iloc[i+1]['Latitude'], df_moving.iloc[i+1]['Longitude']
+        speed = df_moving.iloc[i]['speed']
+        
+        color_val = norm(speed)
+        color = colormap(color_val)
+        
+        plt.plot([lon1, lon2], [lat1, lat2], color=color, linewidth=2, alpha=0.8)
+    
+    plt.scatter(df_moving['Longitude'], df_moving['Latitude'], 
+               c=df_moving['speed'], cmap='coolwarm', s=10, alpha=0.6)
+    
+    cbar = plt.colorbar(label='Speed (m/s)')
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.title('GPS Track - Speed Visualization\n(Blue: Slow, Red: Fast)')
+    plt.grid(True, alpha=0.3)
+    plt.axis('equal')
+    plt.tight_layout()
+    plt.savefig('./graphs/gps_speed_track.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("Static GPS track saved as './graphs/gps_speed_track.png'")
+
+# Create the speed-colored track
+create_speed_colored_track(pivot_df)
+
+print(f"All visualizations saved to './graphs/' directory")
+print(f"Open './graphs/gps_speed_track.html' in a web browser to see the interactive map!")
