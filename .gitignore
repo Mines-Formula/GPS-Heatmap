@@ -14,7 +14,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
+# build/ - Commented out to allow React build directory
 develop-eggs/
 dist/
 downloads/
@@ -50,7 +50,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # React build
-/build
 /dist
 
 # Environment variables
