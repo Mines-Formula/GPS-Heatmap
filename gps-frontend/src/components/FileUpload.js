@@ -5,6 +5,7 @@ import './FileUpload.css';
 const FileUpload = ({ onTrackUpload, loading, setLoading }) => {
   const fileInputRef = useRef(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [timeResolution, setTimeResolution] = useState(2);
 
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
@@ -29,6 +30,7 @@ const FileUpload = ({ onTrackUpload, loading, setLoading }) => {
       const formData = new FormData();
       formData.append('uploaded_file', file);
       formData.append('name', file.name.replace('.csv', ''));
+      formData.append('time_resolution', timeResolution);
 
       const response = await axios.post(
         'http://localhost:8000/api/tracks/upload/',
@@ -69,6 +71,29 @@ const FileUpload = ({ onTrackUpload, loading, setLoading }) => {
         <div className="upload-content">
           <h3>Upload GPS Data</h3>
           <p>Select a CSV file</p>
+          
+          {/* Time Resolution Setting */}
+          <div className="time-resolution-setting">
+            <label htmlFor="timeResolution" className="resolution-label">
+              Time Resolution (points per second):
+            </label>
+            <div className="resolution-input-group">
+              <input
+                id="timeResolution"
+                type="number"
+                min="1"
+                max="100"
+                value={timeResolution}
+                onChange={(e) => setTimeResolution(parseInt(e.target.value) || 1)}
+                className="resolution-input"
+                disabled={loading}
+              />
+              <span className="resolution-unit">pts/sec</span>
+            </div>
+            <small className="resolution-help">
+              Higher values = more detailed tracks (2-4 recommended)
+            </small>
+          </div>
           
           <input
             ref={fileInputRef}

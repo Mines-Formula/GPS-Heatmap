@@ -5,7 +5,7 @@ from .models import GPSTrack, GPSPoint
 from django.db import transaction
 import os
 
-time_resolution = 5 # amount of data points per second
+time_resolution = 10 # amount of data points per second
 
 def filter_gps_outliers(pivot_df, std_multiplier=20):
     """
@@ -49,10 +49,14 @@ def filter_gps_outliers(pivot_df, std_multiplier=20):
     
     return filtered_df
 
-def process_gps_csv(track_instance):
+def process_gps_csv(track_instance, time_resolution=5):
     """
     Process uploaded CSV file using EXACT same logic as generate.py
     Handles CAN bus data format with Timestamp, CANID, Sensor, Value, Unit columns
+    
+    Args:
+        track_instance: GPSTrack instance
+        time_resolution: Number of data points per second (default: 5)
     """
     try:
         file_path = track_instance.uploaded_file.path
@@ -91,7 +95,7 @@ def process_gps_csv(track_instance):
             return False, "Need at least 2 valid GPS coordinate pairs"
         
         # NEW: Filter out GPS outliers using standard deviation
-        pivot_df = filter_gps_outliers(pivot_df, std_multiplier=20)
+        pivot_df = filter_gps_outliers(pivot_df, std_multiplier=15)
         print(f"After outlier removal: {len(pivot_df)} rows")
         
         if len(pivot_df) < 2:
@@ -100,11 +104,26 @@ def process_gps_csv(track_instance):
         # Convert timestamp to seconds (EXACT same as generate.py)
         pivot_df['seconds'] = pivot_df['Timestamp'] / 1000
         
-        # Skip first 3 timestamps and remove duplicates by second (EXACT same as generate.py)
+        # Process data based on time_resolution per second
         pivot_df = pivot_df.iloc[0:].copy()
-        #pivot_df = pivot_df.iloc.copy()
-        pivot_df['second_int'] = pivot_df['seconds'].astype(int)
-        pivot_df = pivot_df.drop_duplicates(subset=['second_int'], keep='first')
+        
+        # Create time bins based on time_resolution
+        if time_resolution > 0:
+            # Calculate the time interval for each bin (1/time_resolution seconds)
+            time_interval = 1.0 / time_resolution
+            
+            # Create time bins
+            pivot_df['time_bin'] = (pivot_df['seconds'] / time_interval).astype(int)
+            
+            # Group by time bins and keep first point in each bin
+            initial_count = len(pivot_df)
+            pivot_df = pivot_df.drop_duplicates(subset=['time_bin'], keep='first')
+            
+            print(f"Time resolution: {time_resolution} points/second (interval: {time_interval:.3f}s)")
+            print(f"Reduced from {initial_count} to {len(pivot_df)} points based on time resolution")
+        else:
+            # If time_resolution is 0 or negative, keep all points
+            print("Time resolution disabled - keeping all data points")
         
         # Sort by timestamp to ensure proper order (EXACT same as generate.py)
         pivot_df = pivot_df.sort_values('seconds').reset_index(drop=True)

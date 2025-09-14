@@ -26,8 +26,18 @@ class GPSTrackViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             track = serializer.save()
             
-            # Process the CSV file
-            success, message = process_gps_csv(track)
+            # Get time_resolution from request data (default to 5 if not provided)
+            time_resolution = int(request.data.get('time_resolution', 5))
+            
+            # Validate time_resolution range
+            if time_resolution < 1 or time_resolution > 100:
+                track.delete()
+                return Response({
+                    'error': 'Time resolution must be between 1 and 100 points per second'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Process the CSV file with specified time resolution
+            success, message = process_gps_csv(track, time_resolution)
             
             if success:
                 # Return the processed track data

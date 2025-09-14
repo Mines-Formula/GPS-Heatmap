@@ -89,3 +89,63 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Time Resolution Setting */
+.time-resolution-setting {
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid #4a4a4a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.resolution-label {
+  display: block;
+  color: #667eea;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.resolution-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.resolution-input {
+  background: #1a1a1a;
+  border: 1px solid #4a4a4a;
+  border-radius: 6px;
+  color: white;
+  padding: 10px 12px;
+  width: 80px;
+  font-size: 16px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.resolution-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.resolution-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resolution-unit {
+  color: #888;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.resolution-help {
+  color: #888;
+  font-size: 12px;
+  font-style: italic;
+  display: block;
+}
