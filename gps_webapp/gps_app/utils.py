@@ -5,6 +5,8 @@ from .models import GPSTrack, GPSPoint
 from django.db import transaction
 import os
 
+time_resolution = 5 # amount of data points per second
+
 def filter_gps_outliers(pivot_df, std_multiplier=20):
     """
     Filter out GPS outliers using standard deviation
@@ -99,7 +101,8 @@ def process_gps_csv(track_instance):
         pivot_df['seconds'] = pivot_df['Timestamp'] / 1000
         
         # Skip first 3 timestamps and remove duplicates by second (EXACT same as generate.py)
-        pivot_df = pivot_df.iloc[3:].copy()
+        pivot_df = pivot_df.iloc[0:].copy()
+        #pivot_df = pivot_df.iloc.copy()
         pivot_df['second_int'] = pivot_df['seconds'].astype(int)
         pivot_df = pivot_df.drop_duplicates(subset=['second_int'], keep='first')
         

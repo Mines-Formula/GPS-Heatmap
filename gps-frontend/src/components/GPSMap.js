@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -81,6 +81,8 @@ const MapController = ({ trackData, currentPoint }) => {
 };
 
 const GPSMap = ({ trackData, currentPoint }) => {
+  const [useSatellite, setUseSatellite] = useState(false);
+
   if (!trackData || !trackData.points || trackData.points.length === 0) {
     return (
       <div className="map-placeholder">
@@ -103,12 +105,29 @@ const GPSMap = ({ trackData, currentPoint }) => {
         zoomControl={true}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution={useSatellite 
+            ? '&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, Maxar, Earthstar Geographics'
+            : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          }
+          url={useSatellite
+            ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          }
         />
         
         <MapController trackData={trackData} currentPoint={currentPoint} />
       </MapContainer>
+      
+      {/* Satellite Background Toggle */}
+      <div className="map-controls">
+        <div className={`satellite-toggle ${useSatellite ? 'active' : ''}`}>
+          <span className="toggle-label">Map</span>
+          <div className="toggle-slider" onClick={() => setUseSatellite(!useSatellite)}>
+            <div className={`slider-thumb ${useSatellite ? 'active' : ''}`}></div>
+          </div>
+          <span className="toggle-label">Satellite</span>
+        </div>
+      </div>
       
       <div className="map-legend">
         <div className="legend-item">
