@@ -51,7 +51,6 @@ def filter_gps_outliers(pivot_df, std_multiplier=20):
 
 def process_gps_csv(track_instance, time_resolution=5):
     """
-    Process uploaded CSV file using EXACT same logic as generate.py
     Handles CAN bus data format with Timestamp, CANID, Sensor, Value, Unit columns
     
     Args:
@@ -133,7 +132,7 @@ def process_gps_csv(track_instance, time_resolution=5):
         if len(pivot_df) < 2:
             return False, "Not enough GPS points after processing"
         
-        # Calculate speeds using EXACT same logic as generate.py
+        # Calculate speeds
         speeds = calculate_speeds_vectorized(pivot_df)
         pivot_df['speed'] = speeds
         
@@ -177,9 +176,6 @@ def process_gps_csv(track_instance, time_resolution=5):
         return False, f"Error processing CSV: {str(e)}"
 
 def calculate_speeds_vectorized(df):
-    """
-    EXACT same speed calculation logic as generate.py
-    """
     if len(df) <= 1:
         return np.array([0])
     
