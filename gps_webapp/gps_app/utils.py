@@ -64,19 +64,19 @@ def process_gps_csv(track_instance, time_resolution=5):
         
         print(f"Processing CSV file: {file_path} ({file_size / (1024*1024):.1f} MB)")
         
-        # Read and filter data more efficiently (EXACT same as generate.py)
+        # Read and filter data more efficiently 
         df = pd.read_csv(file_path)
         print(f"Total rows in CSV: {len(df)}")
         print(f"CSV columns: {list(df.columns)}")
         
-        # Filter for GPS sensors (EXACT same as generate.py)
+        # Filter for GPS sensors
         filtered_df = df[df['Sensor'].isin(['Longitude', 'Latitude'])]
         print(f"Rows with GPS data: {len(filtered_df)}")
         
         if len(filtered_df) == 0:
             return False, "No GPS data found. CSV must contain rows with Sensor = 'Longitude' and 'Latitude'"
         
-        # Pivot the data to have lat/lon in separate columns (EXACT same as generate.py)
+        # Pivot the data to have lat/lon in separate columns 
         pivot_df = filtered_df.pivot_table(
             index='Timestamp', 
             columns='Sensor', 
@@ -87,7 +87,7 @@ def process_gps_csv(track_instance, time_resolution=5):
         print(f"Pivoted data shape: {pivot_df.shape}")
         print(f"Pivot columns: {list(pivot_df.columns)}")
         
-        # Drop rows where either lat or lon is missing (EXACT same as generate.py)
+        # Drop rows where either lat or lon is missing 
         pivot_df = pivot_df.dropna(subset=['Latitude', 'Longitude'])
         print(f"After dropping NaN: {len(pivot_df)} rows")
         
@@ -101,7 +101,7 @@ def process_gps_csv(track_instance, time_resolution=5):
         if len(pivot_df) < 2:
             return False, "Not enough GPS points after outlier removal"
         
-        # Convert timestamp to seconds (EXACT same as generate.py)
+        # Convert timestamp to seconds 
         pivot_df['seconds'] = pivot_df['Timestamp'] / 1000
         
         # Process data based on time_resolution per second
@@ -125,7 +125,7 @@ def process_gps_csv(track_instance, time_resolution=5):
             # If time_resolution is 0 or negative, keep all points
             print("Time resolution disabled - keeping all data points")
         
-        # Sort by timestamp to ensure proper order (EXACT same as generate.py)
+        # Sort by timestamp to ensure proper order 
         pivot_df = pivot_df.sort_values('seconds').reset_index(drop=True)
         
         print(f"Final processed data: {len(pivot_df)} points")
@@ -195,7 +195,7 @@ def calculate_speeds_vectorized(df):
         time_diff = times[i] - times[i-1]
         speed = distance / time_diff if time_diff > 0 else 0
         
-        # Cap unrealistic speeds (EXACT same as generate.py)
+        # Cap unrealistic speeds 
         speeds[i] = 0 if speed > 134 else speed
     
     return speeds
